@@ -19,6 +19,6 @@ WORKDIR /app
 RUN mkdir /app/cpotree
 WORKDIR /app/cpotree
 ADD . /app/cpotree
-RUN mkdir /app/cpotree/dockerbuild
-RUN cd dockerbuild && cmake -DCMAKE_BUILD_TYPE=Release ..
-RUN cd dockerbuild && make
+RUN mkdir /app/cpotree/build
+RUN cd build && cmake -DCMAKE_BUILD_TYPE=Release ..
+RUN cd build && make
