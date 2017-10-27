@@ -1,7 +1,14 @@
 #pragma once
+#ifndef POTREE_FILTERS
+#define POTREE_FILTERS
 
+//#include <io.h>
+#ifdef __APPLE__
+		#include <sys/uio.h>
+#else
+		#include <sys/io.h>
+#endif
 
-#include <io.h>
 #include <fcntl.h>
 
 #include "StandardIncludes.h"
@@ -22,7 +29,7 @@ struct FilterResult{
 
 bool checkThreshold(vector<string> files, dmat4 box, int minLevel, int maxLevel, int threshold){
 	OBB obb(box);
-	
+
 	vector<PotreeReader*> readers;
 	for (auto file : files) {
 		PotreeReader *reader = new PotreeReader(file);
@@ -34,19 +41,19 @@ bool checkThreshold(vector<string> files, dmat4 box, int minLevel, int maxLevel,
 	for (auto reader : readers) {
 		workload.push(reader->root);
 	}
-	
+
 	int estimate = 0;
 	while(!workload.empty()){
 		auto node = workload.top();
 		workload.pop();
-	
+
 		intersectingNodes.push_back(node);
 		estimate += 8'000;
 
 		if(estimate > threshold){
 			return false;
 		}
-	
+
 		for(auto child : node->children()){
 			if(child != nullptr && obb.intersects(child->boundingBox) && child->level <= maxLevel){
 				workload.push(child);
@@ -99,7 +106,7 @@ bool checkThreshold(vector<string> files, vector<dmat4> boxes, int minLevel, int
 						break;
 					}
 				}
-				
+
 				if (intersects) {
 					workload.push(child);
 				}
@@ -112,17 +119,17 @@ bool checkThreshold(vector<string> files, vector<dmat4> boxes, int minLevel, int
 
 FilterResult estimatePointsInBox(PotreeReader *reader, dmat4 box, int minLevel, int maxLevel){
 	OBB obb(box);
-	
+
 	vector<PRNode*> intersectingNodes;
 	stack<PRNode*> workload({reader->root});
-	
+
 	// nodes that intersect with box
 	while(!workload.empty()){
 		auto node = workload.top();
 		workload.pop();
-	
+
 		intersectingNodes.push_back(node);
-	
+
 		for(auto child : node->children()){
 			if(child != nullptr && obb.intersects(child->boundingBox) && child->level <= maxLevel){
 				workload.push(child);
@@ -141,24 +148,24 @@ FilterResult estimatePointsInBox(PotreeReader *reader, dmat4 box, int minLevel, 
 
 ///
 /// The box matrix maps a unit cube to the desired oriented cube.
-/// The unit cube is assumed to have a size of 1/1/1 and it is 
+/// The unit cube is assumed to have a size of 1/1/1 and it is
 /// centered around the origin, i.e. coordinates are [-0.5, 0.5]
 ///
 /// algorithm: http://www.euclideanspace.com/maths/geometry/elements/intersection/twod/index.htm
-/// 
+///
 FilterResult getPointsInBox(PotreeReader *reader, dmat4 box, int minLevel, int maxLevel){
 	OBB obb(box);
-	
+
 	vector<PRNode*> intersectingNodes;
 	stack<PRNode*> workload({reader->root});
-	
+
 	// nodes that intersect with box
 	while(!workload.empty()){
 		auto node = workload.top();
 		workload.pop();
-	
+
 		intersectingNodes.push_back(node);
-	
+
 		for(auto child : node->children()){
 			if(child != nullptr && obb.intersects(child->boundingBox) && child->level <= maxLevel){
 				workload.push(child);
@@ -281,7 +288,7 @@ vector<FilterResult> estimatePointsInProfile(PotreeReader *reader, vector<dvec2>
 		dvec2 end;
 		dmat4 box;
 	};
-	
+
 	vector<Segment> segments;
 	for(int i = 0; i < polyline.size() - 1; i++){
 		dvec3 start = {polyline[i].x, polyline[i].y, bb.center().z};
@@ -293,10 +300,10 @@ vector<FilterResult> estimatePointsInProfile(PotreeReader *reader, vector<dvec2>
 		dvec3 size = {length, width, bb.size().z};
 
 		dmat4 box = glm::translate(dmat4(), start)
-			* glm::rotate(dmat4(), angle, {0.0, 0.0, 1.0}) 
-			* glm::scale(dmat4(), size) 
+			* glm::rotate(dmat4(), angle, {0.0, 0.0, 1.0})
+			* glm::scale(dmat4(), size)
 			* glm::translate(dmat4(), {0.5, 0.0, 0.0});
-		
+
 		Segment segment = {start, end, box};
 		segments.push_back(segment);
 	}
@@ -334,7 +341,7 @@ vector<FilterResult> getPointsInProfile(PotreeReader *reader, vector<dvec2> poly
 		dvec2 end;
 		dmat4 box;
 	};
-	
+
 	vector<Segment> segments;
 	for(int i = 0; i < polyline.size() - 1; i++){
 		dvec3 start = {polyline[i].x, polyline[i].y, bb.center().z};
@@ -346,10 +353,10 @@ vector<FilterResult> getPointsInProfile(PotreeReader *reader, vector<dvec2> poly
 		dvec3 size = {length, width, bb.size().z};
 
 		dmat4 box = glm::translate(dmat4(), start)
-			* glm::rotate(dmat4(), angle, {0.0, 0.0, 1.0}) 
-			* glm::scale(dmat4(), size) 
+			* glm::rotate(dmat4(), angle, {0.0, 0.0, 1.0})
+			* glm::scale(dmat4(), size)
 			* glm::translate(dmat4(), {0.5, 0.0, 0.0});
-		
+
 		Segment segment = {start, end, box};
 		segments.push_back(segment);
 	}
@@ -445,7 +452,7 @@ string createHeader(vector<FilterResult> results, PointAttributes pointAttribute
 			}else{
 				header += "\n";
 			}
-			
+
 		}
 
 		header += "\t],\n";
@@ -477,7 +484,7 @@ void savePotree(vector<FilterResult> results, PointAttributes pointAttributes, o
 	int headerSize = header.size();
 	out->write(reinterpret_cast<const char*>(&headerSize), 4);
 	out->write(header.c_str(), header.size());
-	
+
 	double mileage = 0.0;
 	for(auto &result : results){
 
@@ -493,7 +500,7 @@ void savePotree(vector<FilterResult> results, PointAttributes pointAttributes, o
 					unsigned int ux = (p.position.x - min.x) / scale;
 					unsigned int uy = (p.position.y - min.y) / scale;
 					unsigned int uz = (p.position.z - min.z) / scale;
-	
+
 					out->write(reinterpret_cast<const char *>(&ux), 4);
 					out->write(reinterpret_cast<const char *>(&uy), 4);
 					out->write(reinterpret_cast<const char *>(&uz), 4);
@@ -503,7 +510,7 @@ void savePotree(vector<FilterResult> results, PointAttributes pointAttributes, o
 					double dx = glm::dot(lp, obb.axes[0]) + mileage;
 					//double dy = glm::dot(lp, obb.axes[1]);
 					double dz = glm::dot(lp, obb.axes[2]);
-					
+
 					unsigned int ux = dx / scale;
 					//unsigned int uy = dy / scale;
 					unsigned int uz = dz / scale;
@@ -561,30 +568,30 @@ void saveLAS(vector<FilterResult> results, PointAttributes attributes, dvec3 sca
 
 	// Version Major
 	char versionMajor = 1;
-	out->write(reinterpret_cast<const char*>(&versionMajor), 1);				
+	out->write(reinterpret_cast<const char*>(&versionMajor), 1);
 
 	// Version Minor
 	char versionMinor = 2;
-	out->write(reinterpret_cast<const char*>(&versionMinor), 1);				
+	out->write(reinterpret_cast<const char*>(&versionMinor), 1);
 
 	out->write("PotreeElevationProfile          ", 32);	// System Identifier
 	out->write("PotreeElevationProfile          ", 32); // Generating Software
 
 	// File Creation Day of Year
 	unsigned short day = 0;
-	out->write(reinterpret_cast<const char*>(&day), 2);	
+	out->write(reinterpret_cast<const char*>(&day), 2);
 
 	// File Creation Year
 	unsigned short year = 0;
-	out->write(reinterpret_cast<const char*>(&year), 2);	
+	out->write(reinterpret_cast<const char*>(&year), 2);
 
 	// Header Size
 	unsigned short headerSize = 227;
-	out->write(reinterpret_cast<const char*>(&headerSize), 2);	
+	out->write(reinterpret_cast<const char*>(&headerSize), 2);
 
 	// Offset to point data
 	unsigned long offsetToData = 227 + 54 + args.get("metadata", 0).size();
-	out->write(reinterpret_cast<const char*>(&offsetToData), 4);	
+	out->write(reinterpret_cast<const char*>(&offsetToData), 4);
 
 	// Number variable length records
 	unsigned long numVarRecords = args.hasKey("metadata") ? 1 : 0;
@@ -592,11 +599,11 @@ void saveLAS(vector<FilterResult> results, PointAttributes attributes, dvec3 sca
 
 	// Point Data Record Format
 	unsigned char pointFormat = 2;
-	out->write(reinterpret_cast<const char*>(&pointFormat), 1);	
+	out->write(reinterpret_cast<const char*>(&pointFormat), 1);
 
 	// Point Data Record Length
 	unsigned short pointRecordLength = 26;
-	out->write(reinterpret_cast<const char*>(&pointRecordLength), 2);	
+	out->write(reinterpret_cast<const char*>(&pointRecordLength), 2);
 
 	// Number of points
 	out->write(reinterpret_cast<const char*>(&numPoints), 4);
@@ -653,28 +660,28 @@ void saveLAS(vector<FilterResult> results, PointAttributes attributes, dvec3 sca
 	vector<char> buffer(pointRecordLength, 0);
 
 	for(auto &result : results){
-	
+
 		dmat4 box = result.box;
 		OBB obb(box);
 		dvec3 localMin = dvec3(box * dvec4(-0.5, -0.5, -0.5, 1.0));
 		dvec3 lvx = dvec3(box * dvec4(+0.5, -0.5, -0.5, 1.0)) - localMin;
-	
+
 		for(Point &p : result.points){
-	
+
 			int *ixyz = reinterpret_cast<int*>(&buffer[0]);
 			unsigned short *intensity = reinterpret_cast<unsigned short*>(&buffer[12]);
 			unsigned short *rgb = reinterpret_cast<unsigned short*>(&buffer[20]);
-	
+
 			ixyz[0] = (p.position.x - bb.min.x) / scale.x;
 			ixyz[1] = (p.position.y - bb.min.y) / scale.y;
 			ixyz[2] = (p.position.z - bb.min.z) / scale.z;
-	
+
 			intensity[0] = p.intensity;
-	
+
 			rgb[0] = p.color.r;
 			rgb[1] = p.color.g;
 			rgb[2] = p.color.b;
-	
+
 			out->write(buffer.data(), pointRecordLength);
 		}
 	}
@@ -700,7 +707,7 @@ void save(vector<FilterResult> results, Arguments args){
 		attributes.push_back(PointAttribute::INTENSITY);
 		attributes.push_back(PointAttribute::POSITION_PROJECTED_PROFILE);
 	}
-	
+
 	auto pointAttributes = PointAttributes(attributes);
 
 	// write to stdout
@@ -720,9 +727,10 @@ void save(vector<FilterResult> results, Arguments args){
 			saveLAS(results, pointAttributes, scale, &out, args);
 			out.close();
 		}else{
-			// file type not supported		
+			// file type not supported
 		}
-		
+
 	}
 
 }
+#endif

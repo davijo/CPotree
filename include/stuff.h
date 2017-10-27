@@ -1,4 +1,6 @@
 #pragma once
+#ifndef CPOTREE_STUFF
+#define CPOTREE_STUFF
 
 #include "StandardIncludes.h"
 
@@ -27,7 +29,7 @@ string trim(const string& s, string tokens){
 
 	size_t p = s.find_first_not_of(tokens);
 	tmp.erase(0, p);
-	
+
 	p = tmp.find_last_not_of(tokens);
 	if (string::npos != p)
 		tmp.erase(p+1);
@@ -55,14 +57,14 @@ string replaceAll(const std::string& str, const std::string& from, const std::st
 	size_t start_pos = 0;
 	while((start_pos = tmp.find(from, start_pos)) != std::string::npos) {
 		tmp.replace(start_pos, from.length(), to);
-		start_pos += to.length(); 
+		start_pos += to.length();
 	}
 
 	return tmp;
 }
 
 string join(vector<string> list, string seperator = string(", ")){
-	
+
 	string result;
 
 	for(int i = 0; i < list.size(); i++){
@@ -147,13 +149,13 @@ struct Arguments{
 		}
 	}
 
-	string get(string key, int index, string default){
+	string get(string key, int index, string def){
 		auto values = get(key);
 
 		if(values.size() > index){
 			return values[index];
 		}else{
-			return default;
+			return def;
 		}
 	}
 
@@ -181,7 +183,7 @@ struct Arguments{
 		}
 	}
 
-	int getInt(string key, int index, int default){
+	int getInt(string key, int index, int def){
 		auto values = get(key);
 
 		if(values.size() > index){
@@ -189,16 +191,16 @@ struct Arguments{
 
 			return value;
 		}else{
-			return default;
+			return def;
 		}
 	}
 
 	string toString(){
-		
+
 		string msg = "";
 
 		for(auto item : values){
-			
+
 			msg += item.first + ": [" + join(item.second) + "]\n";
 
 		}
@@ -218,7 +220,7 @@ public:
 	Timer(string name){
 		this->name = name;
 	}
-	
+
 	Timer& start(){
 		begin = std::chrono::steady_clock::now();
 
@@ -248,3 +250,5 @@ public:
 	}
 
 };
+
+#endif

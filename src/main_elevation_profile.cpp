@@ -1,4 +1,4 @@
-
+//#define _POSIX_C_SOURCE 200809L
 #include "PotreeFilters.h"
 
 int main(int argc, char* argv[]){
@@ -7,12 +7,12 @@ int main(int argc, char* argv[]){
 	//std::cout.rdbuf()->pubsetbuf( 0, 0 );
 
 	Arguments args(argc, argv);
-
+	/* Does not compile
 	if(args.hasKey("stdout")){
 		_setmode( _fileno( stdout ),  _O_BINARY );
 	}
-	
-	
+	*/
+
 	string file = args.get("", 0);
 	string strPolyline = args.get("coordinates", 0);
 	double width = args.getDouble("width", 0);
@@ -36,7 +36,7 @@ int main(int argc, char* argv[]){
 			polyline.push_back({x, y});
 		}
 	}
-	
+
 	PotreeReader *reader = new PotreeReader(file);
 
 	if(args.hasKey("estimate")){
@@ -51,10 +51,10 @@ int main(int argc, char* argv[]){
 	}else{
 		auto results = getPointsInProfile(reader, polyline, width, minLevel, maxLevel);
 
-		save(reader, results, args);
+		save({results}, args);
 	}
 
-	
+
 
 	return 0;
 }

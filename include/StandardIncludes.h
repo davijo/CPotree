@@ -1,5 +1,6 @@
 #pragma once
-
+#ifndef STANDARD_INCLUDES
+#define STANDARD_INCLUDES
 
 #include <vector>
 #include <unordered_map>
@@ -37,3 +38,5 @@ using std::getline;
 using std::cin;
 using std::cerr;
 using std::ostream;
+
+#endif

@@ -1,12 +1,19 @@
 #pragma once
+#ifndef CPOTREE_PMATH
+#define CPOTREE_PMATH
 
 #include "StandardIncludes.h"
 
+#include "glm/glm.hpp"
+#include "glm/gtc/constants.hpp"
+#include "glm/gtc/matrix_transform.hpp"
+#include "glm/gtc/type_ptr.hpp"
+/*
 #include <glm/glm.hpp>
 #include <glm/gtc/constants.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 #include <glm/gtc/type_ptr.hpp>
-
+*/
 
 using glm::dvec2;
 using glm::dvec3;
@@ -18,9 +25,9 @@ static const double infinity = numeric_limits<double>::infinity();
 struct AABB{
 	dvec3 min = {infinity, infinity, infinity};
 	dvec3 max = {-infinity, -infinity, -infinity};
-	
+
 	AABB(){
-	
+
 	}
 
 	AABB(dvec3 min, dvec3 max){
@@ -46,7 +53,7 @@ struct AABB{
 	}
 
 	vector<dvec3> vertices(){
-		
+
 		vector<dvec3> v = {
 			{min.x, min.y, min.z},
 			{min.x, min.y, max.z},
@@ -69,7 +76,7 @@ struct AABB{
 	}
 
 	bool intersects(AABB box){
-		
+
 		// box test from three.js, src/math/Box3.js
 
 		if ( box.max.x < this->min.x || box.min.x > this->max.x ||
@@ -87,7 +94,7 @@ struct AABB{
 		if(point.x < min.x || point.x > max.x){
 			return false;
 		}
-	
+
 		if(point.y < min.y || point.y > max.y){
 			return false;
 		}
@@ -124,5 +131,4 @@ AABB childAABB(AABB &aabb, int &index);
 
 dvec3 project(dvec3 point, dvec3 normal);
 
-
-
+#endif

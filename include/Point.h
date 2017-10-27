@@ -1,6 +1,7 @@
 #pragma once
 
-#include <glm/glm.hpp>
+#include "glm/glm.hpp"
+//#include <glm/glm.hpp>
 
 
 struct Point{
@@ -14,7 +15,7 @@ struct Point{
 	unsigned short pointSourceID = 0;
 
 	Point(){
-	
+
 	}
 
 

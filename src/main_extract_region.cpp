@@ -1,4 +1,4 @@
-
+//#define _POSIX_C_SOURCE 200809L
 #include "PotreeFilters.h"
 
 int main(int argc, char* argv[]){
@@ -6,11 +6,11 @@ int main(int argc, char* argv[]){
 	//std::cout.rdbuf()->pubsetbuf( 0, 0 );
 
 	Arguments args(argc, argv);
-
+	/* Computer says no
 	if(args.hasKey("stdout")){
 		_setmode( _fileno( stdout ),  _O_BINARY );
 	}
-	
+	*/
 	vector<string> files = args.get("");
 	string strBoxes = args.get("box", 0);
 	string metadata = args.get("metadata", 0);
@@ -40,9 +40,9 @@ int main(int argc, char* argv[]){
 			dmat4 box = glm::make_mat4(boxValues.data());
 			boxes.push_back(box);
 		}
-		
+
 	}
-	
+
 	if(args.hasKey("check-threshold")){
 		int threshold = args.getInt("check-threshold", 0, 0);
 
@@ -69,7 +69,7 @@ int main(int argc, char* argv[]){
 		save({results}, args);
 	}
 
-	
+
 
 	return 0;
 }

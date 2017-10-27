@@ -1,4 +1,6 @@
 #pragma once
+#ifndef POTREE_READER
+#define POTREE_READER
 
 #include "StandardIncludes.h"
 
@@ -41,13 +43,13 @@ public:
 
 };
 
-inline bool operator==(const PointAttribute& lhs, const PointAttribute& rhs){ 
+inline bool operator==(const PointAttribute& lhs, const PointAttribute& rhs){
 	return lhs.ordinal == rhs.ordinal;
 }
 
 
 struct PointAttributes{
-	
+
 	vector<PointAttribute> attributes;
 	int byteSize = 0;
 
@@ -196,7 +198,7 @@ public:
 		for(int i = 0; i < numParts; i++){
 			path += indices.substr(i * hierarchyStepSize, hierarchyStepSize) + "/";
 		}
-	
+
 		path.pop_back();
 
 		return path;
@@ -240,7 +242,7 @@ public:
 		vector<PRNode*> nodes = {node};
 
 		for(int i = 0; i < numNodes; i++){
-			
+
 			PRNode *node = nodes[i];
 
 			unsigned char childBitset = buffer[5*i];
@@ -252,11 +254,11 @@ public:
 				// no children
 				continue;
 			}
-				
+
 			node->_children.resize(8, nullptr);
 
 			for(int j = 0; j < 8; j++){
-				
+
 				if((childBitset & (1 << j)) == 0){
 					// no child at index j
 					continue;
@@ -289,5 +291,4 @@ public:
 
 
 
-
-
+#endif
